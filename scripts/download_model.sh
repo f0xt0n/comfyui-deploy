@@ -3,15 +3,15 @@
 # Model Downloader
 
 download_huggingface() {
-    # Check if MODELS_TO_DL environment variable is set
-    if [ -z "$MODELS_TO_DL" ]; then
-        echo "🚨 MODELS_TO_DL environment variable is not set"
-        echo "Usage: MODELS_TO_DL='Qwen' $0"
-        echo "       MODELS_TO_DL='Qwen,Llama' $0"
+    # Check if MODELS_TO_DOWNLOAD environment variable is set
+    if [ -z "$MODELS_TO_DOWNLOAD" ]; then
+        echo "🚨 MODELS_TO_DOWNLOAD environment variable is not set"
+        echo "Usage: MODELS_TO_DOWNLOAD='Qwen' $0"
+        echo "       MODELS_TO_DOWNLOAD='Qwen,Llama' $0"
         exit 1
     fi
-    # Convert MODELS_TO_DL to array (supports both comma and space separated)
-    IFS=', ' read -ra MODELS_ARRAY <<< "$MODELS_TO_DL"
+    # Convert MODELS_TO_DOWNLOAD to array (supports both comma and space separated)
+    IFS=', ' read -ra MODELS_ARRAY <<< "$MODELS_TO_DOWNLOAD"
     # Process each model
     for model in "${MODELS_ARRAY[@]}"; do
         # Trim whitespace
@@ -51,7 +51,7 @@ download_civitai() {
     # Get LoRAs & Checkpoints
     declare -A MODEL_CATEGORIES=(
         ["$NETWORK_VOLUME/ComfyUI/models/loras"]="$LORAS_IDS_TO_DOWNLOAD"
-        ["$NETWORK_VOLUME/ComfyUI/models/checkpoints"]="$SDXL_MODEL_IDS_TO_DOWNLOAD"
+        ["$NETWORK_VOLUME/ComfyUI/models/checkpoints"]="$CHECKPOINTS_IDS_TO_DOWNLOAD"
     )
     # Counter to track background jobs
     download_count=0
@@ -124,8 +124,8 @@ case "$1" in
         ;;
     *)
         echo "Usage: $0 {download_model}"
-        echo "  huggingface - Download HF models from HF_MODELS environment variable."
-        echo "  civitai - Download CivitAI from LORAS_IDS_TO_DOWNLOAD & SDXL_MODEL_IDS_TO_DOWNLOAD environment variable."
+        echo "  huggingface - Download HF models from MODELS_TO_DOWNLOAD environment variable."
+        echo "  civitai - Download CivitAI from LORAS_IDS_TO_DOWNLOAD & CHECKPOINTS_IDS_TO_DOWNLOAD environment variable."
         echo "  aria2 - General Aria2 downloader from input URL & FULL-PATH."
         exit 1
         ;;

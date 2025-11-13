@@ -3,7 +3,7 @@
 # Model Declarer
 
 # Define repository arrays for each model
-# Format: "repo_name|file_name"
+# Format: "repo_name|file_name|dest_dir"
 declare -A MODEL_REPOS
 
 MODEL_REPOS[Qwen]="
