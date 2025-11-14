@@ -13,13 +13,13 @@ MODEL_REPOS[Qwen]="
 "
 
 #MODEL_REPOS[Llama]="
-    meta-llama/Llama-2-7b|config.json
-    meta-llama/Llama-2-13b|pytorch_model.bin
+#    meta-llama/Llama-2-7b|config.json
+#    meta-llama/Llama-2-13b|pytorch_model.bin
 #"
 
 #MODEL_REPOS[Mistral]="
-    mistralai/Mistral-7B-v0.1|config.json
-    mistralai/Mixtral-8x7B-v0.1|pytorch_model.bin
+#    mistralai/Mistral-7B-v0.1|config.json
+#    mistralai/Mixtral-8x7B-v0.1|pytorch_model.bin
 #"
 
 

@@ -16,40 +16,16 @@ export VAE_DIR="$NETWORK_VOLUME/ComfyUI/models/vae"
 export UPSCALE_MODELS_DIR="$NETWORK_VOLUME/ComfyUI/models/upscale_models"
 
 
-# ComfyUI Custom Nodes
-echo "Installing custom nodes.."
-"$(dirname "$0")/install_custom_nodes.sh" "$@" > /tmp/custom_nodes.log 2>&1
-CUSTOMNODES_PID=$!
-#wait "$CUSTOMNODES_PID"
-
-
-# SageAttention 2++
-"$(dirname "$0")/install_sageattention.sh" "$@" > /tmp/sage_build.log 2>&1
-SAGE_PID=$!
-#echo "SageAttention build started in background (PID: $SAGE_PID)"
-
-
-# CivitAI Downloader
-"$(dirname "$0")/install_civitai_downloader.sh" "$@"
-ARIA_PID=$!
-wait "$ARIA_PID"
-
-
 # Get Models to download list
 "$(dirname "$0")/declare_model.sh" "$@"
-MODELS_PID=$!
-wait "$MODELS_PID"
 
 
 # Download HF Models
 "$(dirname "$0")/download_model.sh" huggingface
-HF_PID=$!
-wait "$HF_PID"
 
 
 # Download LoRAs & Checkpoints
-"$(dirname "$0")/download_model.sh" civitai &
-CIVITAI_PID=$!
+"$(dirname "$0")/download_model.sh" civitai
 
 
 # Wait for all downloads to complete
@@ -62,12 +38,6 @@ done
 echo "✅ All models downloaded successfully!"
 
 
-# Model Relocator
-#"$(dirname "$0")/model_relocator.sh" qwen_image_edit_2509
-#RELOCATOR_PID=$!
-#wait "$RELOCATOR_PID"
-
-
 # JupyterLab
 echo "Starting JupyterLab in ${NETWORK_VOLUME}..."
 jupyter-lab --ip=0.0.0.0 --allow-root --no-browser --NotebookApp.token='' --NotebookApp.password='' --ServerApp.allow_origin='*' --ServerApp.allow_credentials=True --notebook-dir=/workspace > /tmp/jupyterlab.log 2>&1 &
@@ -75,7 +45,6 @@ jupyter-lab --ip=0.0.0.0 --allow-root --no-browser --NotebookApp.token='' --Note
 
 # Workspace as main working directory
 echo "cd $NETWORK_VOLUME" >> ~/.bashrc
-
 
 echo "Updating default preview method..."
 CONFIG_PATH="$NETWORK_VOLUME/ComfyUI/user/default/ComfyUI-Manager"
@@ -115,37 +84,18 @@ echo "Config file setup complete!"
 echo "Default preview method updated to 'auto'"
 
 
-# Wait for SageAttention build to complete and check status
-#while kill -0 "$SAGE_PID" 2>/dev/null; do
-#    echo "🛠️ SageAttention is currently installing... (this can take around 5 minutes)"
-#    sleep 10
-#done
-# Check if build completed successfully
-#SAGE_ATTENTION_AVAILABLE=false
-#if [ -f "/tmp/sage_build_done" ]; then
-#    SAGE_ATTENTION_AVAILABLE=true
-#    echo "✅ SageAttention build completed successfully"
-#else
-#    echo "⚠️ SageAttention build failed. Launching ComfyUI without --use-sage-attention flag"
-#    echo "Build log available at /tmp/sage_build.log"
-#fi
-wait "$SAGE_PID"
-if [ kill -0 "$SAGE_PID" 2>/dev/null ]; then
-    SAGE_ATTENTION_AVAILABLE=true
-    echo "✅ SageAttention installed successfully"
-fi
-
-
-local HOST="127.0.0.1"
-local PORT="8188"
+HOST="127.0.0.1"
+PORT="8188"
 echo "Starting ComfyUI"
-if [ "$SAGE_ATTENTION_AVAILABLE" == "true" ]; then
-  nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-sage-attention --disable-xformers > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
+if [[ "${USE_SAGE_ATTENTION,,}" == "true" ]]; then
+    echo "Using 🐸 SageAttention2.2"
+    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-sage-attention --disable-xformers > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
 else
-  nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-pytorch-cross-attention --disable-xformers > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
+    echo "Using 🔥 PyTorchCrossAttention"
+    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-pytorch-cross-attention --disable-xformers > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
 fi
 echo "View startup logs here: $NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log"
-echo "🔄 ComfyUI Starting Up."
+echo -n "🔄 ComfyUI Starting Up.."
 until timeout 1 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; do
   echo -n "."
   sleep 5
