@@ -7,14 +7,14 @@ download_huggingface() {
     if [ -z "$MODELS_TO_DOWNLOAD" ]; then
         echo "🚨 MODELS_TO_DOWNLOAD environment variable is not set"
         echo "Usage: MODELS_TO_DOWNLOAD='Qwen'"
-        echo "       MODELS_TO_DOWNLOAD='Qwen,Wan2.2'"
+        echo "       MODELS_TO_DOWNLOAD='Qwen,Wan22'"
         echo "--------------------------------------"
         echo "$0"
         echo "--------------------------------------"
         exit 1
     fi
     # Convert MODELS_TO_DOWNLOAD to array (supports both comma and space separated)
-    IFS=', ' read -ra MODELS_ARRAY <<< "$MODELS_TO_DOWNLOAD"
+    IFS=', ' read -ra MODELS_ARRAY <<< "${MODELS_TO_DOWNLOAD,,}"
     # Process each model
     for model in "${MODELS_ARRAY[@]}"; do
         # Trim whitespace
@@ -47,11 +47,51 @@ download_huggingface() {
         done
     done
     echo "Models downloaded!"
+    echo "---"
 }
 
 
+validate_ids() {
+    local input="$1"    
+    # Check if input is empty or placeholder
+    if [ -z "$input" ] || [ "$input" = "<ids>" ]; then
+        echo ""
+        return 0
+    fi
+    # Check if input contains only digits and commas
+    if [[ ! "$input" =~ ^[0-9,]+$ ]]; then
+        echo "Error: Invalid format in '$input'. Must contain only numbers and commas." >&2
+        echo ""
+        return 1
+    fi    
+    # Trim leading/trailing commas and remove consecutive commas
+    input=$(echo "$input" | sed 's/^,*//; s/,*$//; s/,\+/,/g')
+    echo "$input"
+    return 0
+}
 download_civitai() {
-    # Get LoRAs & Checkpoints
+    # Validate and sanitise inputs
+    local loras checkpoints
+    loras=$(validate_ids "$LORAS_IDS_TO_DOWNLOAD")
+    local loras_status=$?    
+    checkpoints=$(validate_ids "$CHECKPOINTS_IDS_TO_DOWNLOAD")
+    local checkpoints_status=$?    
+    # Check for validation errors
+    if [ $loras_status -ne 0 ]; then
+        echo "❌ Invalid LORAS_IDS_TO_DOWNLOAD format"
+        return 1
+    fi    
+    if [ $checkpoints_status -ne 0 ]; then
+        echo "❌ Invalid CHECKPOINTS_IDS_TO_DOWNLOAD format"
+        return 1
+    fi    
+    # Skip download entirely if both are empty
+    if [ -z "$loras" ] && [ -z "$checkpoints" ]; then
+        echo "ℹ️ No model IDs provided. Skipping downloads.."
+        return 0
+    fi
+
+    # Set LoRAs & Checkpoints
     declare -A MODEL_CATEGORIES=(
         ["$NETWORK_VOLUME/ComfyUI/models/loras"]="$LORAS_IDS_TO_DOWNLOAD"
         ["$NETWORK_VOLUME/ComfyUI/models/checkpoints"]="$CHECKPOINTS_IDS_TO_DOWNLOAD"
@@ -61,16 +101,26 @@ download_civitai() {
     # Ensure directories exist and schedule downloads in background
     for TARGET_DIR in "${!MODEL_CATEGORIES[@]}"; do
         mkdir -p "$TARGET_DIR"
-        IFS=',' read -ra MODEL_IDS <<< "${MODEL_CATEGORIES[$TARGET_DIR]}"
-
+        IDS="${MODEL_CATEGORIES[$TARGET_DIR]}"
+        # Skip if no IDs to download
+        if [ -z "$IDS" ] || [ "$IDS" == "<ids>" ]; then
+            continue
+        fi
+        IFS=',' read -ra MODEL_IDS <<< "$IDS"
         for MODEL_ID in "${MODEL_IDS[@]}"; do
+            # Skip empty entries
+            [ -z "$MODEL_ID" ] && continue
             sleep 6
             echo "✒️ Scheduling download: $MODEL_ID to $TARGET_DIR"
             (cd "$TARGET_DIR" && download_with_aria.py -m "$MODEL_ID") &
             ((download_count++))
         done
     done
-    echo "📋 Scheduled $download_count downloads in background"
+    if [ $download_count -eq 0 ]; then
+        echo "ℹ️ No valid model IDs found. No downloads scheduled."
+    else
+        echo "📋 Scheduled $download_count downloads in background"
+    fi
 }
 
 
