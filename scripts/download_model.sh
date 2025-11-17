@@ -6,8 +6,11 @@ download_huggingface() {
     # Check if MODELS_TO_DOWNLOAD environment variable is set
     if [ -z "$MODELS_TO_DOWNLOAD" ]; then
         echo "🚨 MODELS_TO_DOWNLOAD environment variable is not set"
-        echo "Usage: MODELS_TO_DOWNLOAD='Qwen' $0"
-        echo "       MODELS_TO_DOWNLOAD='Qwen,Llama' $0"
+        echo "Usage: MODELS_TO_DOWNLOAD='Qwen'"
+        echo "       MODELS_TO_DOWNLOAD='Qwen,Wan2.2'"
+        echo "--------------------------------------"
+        echo "$0"
+        echo "--------------------------------------"
         exit 1
     fi
     # Convert MODELS_TO_DOWNLOAD to array (supports both comma and space separated)

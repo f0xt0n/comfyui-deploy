@@ -12,14 +12,10 @@ MODEL_REPOS[Qwen]="
     Comfy-Org/Qwen-Image_ComfyUI|split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors|$TEXT_ENCODERS_DIR
 "
 
-#MODEL_REPOS[Llama]="
-#    meta-llama/Llama-2-7b|config.json
-#    meta-llama/Llama-2-13b|pytorch_model.bin
-#"
-
-#MODEL_REPOS[Mistral]="
-#    mistralai/Mistral-7B-v0.1|config.json
-#    mistralai/Mixtral-8x7B-v0.1|pytorch_model.bin
+#MODEL_REPOS[Wan22]="
+#    ||$DIFFUSION_MODELS_DIR
+#    lightx2v/Wan2.2-Lightning|Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V2.0/low_noise_model.safetensors|$LORAS_DIR/Wan2.2
+#    lightx2v/Wan2.2-Distill-Loras|wan2.2_i2v_A14b_low_noise_lora_rank64_lightx2v_4step_1022.safetensors|$LORAS_DIR/Wan2.2
 #"
 
 

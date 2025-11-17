@@ -17,11 +17,11 @@ export UPSCALE_MODELS_DIR="$NETWORK_VOLUME/ComfyUI/models/upscale_models"
 
 
 # Get Models to download list
-"$(dirname "$0")/declare_model.sh" "$@"
+source "$(dirname "$0")/declare_model.sh"
 
 
 # Download HF Models
-"$(dirname "$0")/download_model.sh" huggingface
+source "$(dirname "$0")/download_model.sh" huggingface
 
 
 # Download LoRAs & Checkpoints
