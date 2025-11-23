@@ -9,9 +9,8 @@ download_huggingface() {
         echo "Usage: MODELS_TO_DOWNLOAD='Qwen'"
         echo "       MODELS_TO_DOWNLOAD='Qwen,Wan22'"
         echo "--------------------------------------"
-        echo "$0"
-        echo "--------------------------------------"
-        exit 1
+        echo "ℹ️ No models specified. Continuing.."
+        return 1
     fi
     # Convert MODELS_TO_DOWNLOAD to array (supports both comma and space separated)
     IFS=', ' read -ra MODELS_ARRAY <<< "${MODELS_TO_DOWNLOAD,,}"

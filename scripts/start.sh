@@ -87,12 +87,15 @@ echo "Default preview method updated to 'auto'"
 HOST="127.0.0.1"
 PORT="8188"
 echo "Starting ComfyUI"
-if [[ "${USE_SAGE_ATTENTION,,}" == "true" ]]; then
-    echo "Using 🐸 SageAttention2.2"
-    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-sage-attention --disable-xformers > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
+if [[ "${USE_ATTENTION,,}" == "sage" ]]; then
+    echo "Using 🐸 Sage Attention 2.2.0"
+    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-sage-attention > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
+elif [[ "${USE_ATTENTION,,}" == "flash" ]]; then
+    echo "Using ⚡ Flash Attention 2.8.3"
+    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-flash-attention > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
 else
-    echo "Using 🔥 PyTorchCrossAttention"
-    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-pytorch-cross-attention --disable-xformers > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
+    echo "Using 🔥 PyTorch Cross Attention"
+    nohup python3 "$NETWORK_VOLUME/ComfyUI/main.py" --front-end-version Comfy-Org/ComfyUI_frontend@latest --listen --use-pytorch-cross-attention > "$NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log" 2>&1 &
 fi
 echo "View startup logs here: $NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log"
 echo -n "🔄 ComfyUI Starting Up.."

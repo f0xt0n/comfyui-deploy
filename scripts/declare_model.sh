@@ -23,3 +23,11 @@ MODEL_REPOS[wan22]="
 
 export MODEL_REPOS
 
+
+echo "Available Models:"
+echo "================="    
+for model in "${!MODEL_REPOS[@]}"; do
+    echo "  - $model"
+done    
+echo ""
+
