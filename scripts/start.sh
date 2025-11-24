@@ -99,6 +99,7 @@ else
 fi
 echo "View startup logs here: $NETWORK_VOLUME/comfyui_${RUNPOD_POD_ID}_nohup.log"
 echo -n "🔄 ComfyUI Starting Up.."
+echo -n ""
 until timeout 1 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; do
   echo -n "."
   sleep 5

@@ -7,10 +7,14 @@
 declare -A MODEL_REPOS
 
 MODEL_REPOS[qwen]="
-    nunchaku-tech/nunchaku-qwen-image-edit-2509|svdq-int4_r128-qwen-image-edit-2509-lightningv2.0-8steps.safetensors|$DIFFUSION_MODELS_DIR
+    lightx2v/Qwen-Image-Lightning|Qwen-Image-Edit-2509/qwen_image_edit_2509_fp8_e4m3fn_scaled.safetensors|$DIFFUSION_MODELS_DIR
     Comfy-Org/Qwen-Image_ComfyUI|split_files/vae/qwen_image_vae.safetensors|$VAE_DIR
     Comfy-Org/Qwen-Image_ComfyUI|split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors|$TEXT_ENCODERS_DIR
+    lightx2v/Qwen-Image-Lightning|Qwen-Image-Lightning-8steps-V2.0.safetensors|$LORAS_DIR/Qwen
 "
+# nunchaku-tech/nunchaku-qwen-image-edit-2509|svdq-int4_r128-qwen-image-edit-2509-lightningv2.0-8steps.safetensors|$DIFFUSION_MODELS_DIR
+# Comfy-Org/Qwen-Image-Edit_ComfyUI|split_files/diffusion_models/qwen_image_edit_2509_fp8_e4m3fn.safetensors|$DIFFUSION_MODELS_DIR
+
 
 MODEL_REPOS[wan22]="
     Comfy-Org/Wan_2.2_ComfyUI_Repackaged|split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors|$DIFFUSION_MODELS_DIR

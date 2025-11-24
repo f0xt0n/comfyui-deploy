@@ -5,11 +5,11 @@
 download_huggingface() {
     # Check if MODELS_TO_DOWNLOAD environment variable is set
     if [ -z "$MODELS_TO_DOWNLOAD" ]; then
-        echo "🚨 MODELS_TO_DOWNLOAD environment variable is not set"
+        echo "[🚨] MODELS_TO_DOWNLOAD environment variable is not set"
         echo "Usage: MODELS_TO_DOWNLOAD='Qwen'"
         echo "       MODELS_TO_DOWNLOAD='Qwen,Wan22'"
         echo "--------------------------------------"
-        echo "ℹ️ No models specified. Continuing.."
+        echo "[ℹ️] No models specified. Continuing.."
         return 1
     fi
     # Convert MODELS_TO_DOWNLOAD to array (supports both comma and space separated)
@@ -21,7 +21,7 @@ download_huggingface() {
         echo "Processing model: $model"    
         # Check if model exists in our repository list
         if [ -z "${MODEL_REPOS[$model]}" ]; then
-            echo "⚠️ Model '$model' not found in repository list. Skipping..."
+            echo "[⚠️] Model '$model' not found in repository list. Skipping..."
             continue
         fi    
         # Get repositories for this model
@@ -30,17 +30,28 @@ download_huggingface() {
         for repo_entry in $repos; do
             # Split repo_name, file_name, dest_dir
             IFS='|' read -r repo_name file_name dest_dir <<< "$repo_entry"        
+            # Extract base filename for mark file
+            base_filename=$(basename "$file_name")
+            mark_file="${base_filename}.done"        
+            # Check if already downloaded (mark file exists)
+            if [ -f "$mark_file" ]; then
+                echo "[⏭️] Skipping: $file_name (already downloaded)"
+                echo ""
+                continue
+            fi
             echo "📥 Downloading: $file_name from $repo_name"        
             
             HF_XET_HIGH_PERFORMANCE=1 hf download --local-dir="$HF_DIR" "$repo_name" "$file_name"
 
             if [[ $? -eq 0 ]]; then
-                echo "  ✓ Successfully downloaded $file_name"
+                echo "[✅] Successfully downloaded $file_name"
+                touch "$mark_file"
+                echo "  📝 Created mark file: $mark_file"
                 # Move model to correct destination
                 mv "$HF_DIR/$file_name" "$dest_dir"
                 #"$(dirname "$0")/relocate_model.sh" "$file_name" "$dest_dir"
             else
-                echo "  ✗ Failed to download $file_name from $repo_name"
+                echo "[❌] Failed to download $file_name from $repo_name"
             fi        
             echo "---"
         done
@@ -57,14 +68,16 @@ validate_ids() {
         echo ""
         return 0
     fi
+    # Trim leading/trailing commas and remove consecutive commas
+    input=$(echo "$input" | sed 's/^,*//; s/,*$//; s/,\+/,/g')
+
     # Check if input contains only digits and commas
     if [[ ! "$input" =~ ^[0-9,]+$ ]]; then
         echo "Error: Invalid format in '$input'. Must contain only numbers and commas." >&2
         echo ""
         return 1
     fi    
-    # Trim leading/trailing commas and remove consecutive commas
-    input=$(echo "$input" | sed 's/^,*//; s/,*$//; s/,\+/,/g')
+
     echo "$input"
     return 0
 }
@@ -77,16 +90,16 @@ download_civitai() {
     local checkpoints_status=$?    
     # Check for validation errors
     if [ $loras_status -ne 0 ]; then
-        echo "❌ Invalid LORAS_IDS_TO_DOWNLOAD format"
+        echo "[❌] Invalid LORAS_IDS_TO_DOWNLOAD format"
         return 1
     fi    
     if [ $checkpoints_status -ne 0 ]; then
-        echo "❌ Invalid CHECKPOINTS_IDS_TO_DOWNLOAD format"
+        echo "[❌] Invalid CHECKPOINTS_IDS_TO_DOWNLOAD format"
         return 1
     fi    
     # Skip download entirely if both are empty
     if [ -z "$loras" ] && [ -z "$checkpoints" ]; then
-        echo "ℹ️ No model IDs provided. Skipping downloads.."
+        echo "[ℹ️] No model IDs provided. Skipping downloads.."
         return 0
     fi
 
